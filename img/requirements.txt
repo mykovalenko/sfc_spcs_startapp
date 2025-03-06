@@ -1,0 +1,11 @@
+cachetools
+pyarrow
+pandas
+numpy
+snowflake
+snowflake-connector-python
+snowflake-snowpark-python
+fastapi 
+pydantic
+transformers
+uvicorn

@@ -1,0 +1,18 @@
+name: fastapi
+channels:
+  - https://repo.anaconda.com/pkgs/snowflake
+  - nodefaults
+dependencies:
+  - python=3.11
+  - snowflake
+  - snowflake-connector-python
+  - snowflake-snowpark-python
+  - pyarrow
+  - pandas
+  - numpy
+  - cachetools
+  - pip
+  - pydantic
+  - fastapi 
+  - transformers
+  - uvicorn
