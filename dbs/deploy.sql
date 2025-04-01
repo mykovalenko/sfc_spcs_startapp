@@ -1,14 +1,14 @@
 SET TARGET_DATABASE   = '<% dbsname %>';
 SET DEPLOY_SCHEMA     = '<% depname %>';
-SET DEPLOY_ROLE_OWNER = '<% depname %>_ROL';
-SET APP_ROLE_TYPE_01  = '<% depname %>_R01';
-SET APP_ROLE_TYPE_02  = '<% depname %>_R02';
-SET SERVICE_NAME      = '<% depname %>_SVC';
-SET SERVICE_RUN_USER  = '<% depname %>_USR';
-SET SERVICE_RUN_POOL  = '<% depname %>_CPL';
-SET SERVICE_RUN_VWHS  = '<% depname %>_VWH';
-SET EXT_ACC_INT_NAME  = '<% depname %>_EAI';
-SET EXT_ACC_NET_RULE  = '<% depname %>_NRL';
+SET DEPLOY_ROLE_OWNER = 'APP_<% depname %>_OWNER';
+SET APP_ROLE_TYPE_01  = 'APP_<% depname %>_ROL01';
+SET APP_ROLE_TYPE_02  = 'APP_<% depname %>_ROL02';
+SET SERVICE_NAME      = 'APP_<% depname %>_SVC';
+SET SERVICE_RUN_USER  = 'APP_<% depname %>_USER';
+SET SERVICE_RUN_POOL  = 'APP_<% depname %>_POOL';
+SET SERVICE_RUN_VWHS  = 'APP_<% depname %>_WH';
+SET EXT_ACC_INT_NAME  = 'APP_<% depname %>_EXASINT';
+SET EXT_ACC_NET_RULE  = 'APP_<% depname %>_NETRULE';
 
 
 ---------------------------------------------------------------------------------
@@ -38,14 +38,22 @@ CREATE SERVICE IDENTIFIER($SERVICE_NAME)
   FROM @SPECS
   SPECIFICATION_FILE = 'service.yaml'
   EXTERNAL_ACCESS_INTEGRATIONS = ($EXT_ACC_INT_NAME)
+  QUERY_WAREHOUSE = $SERVICE_RUN_VWHS
   MIN_INSTANCES = 1
   MAX_INSTANCES = 1
 ;
 
+--GRANT SERVICE ROLE IDENTIFIER($SERVICE_NAME)!IDENTIFIER($SERVICE_AXS_ROLE) TO ROLE IDENTIFIER($APP_ROLE_TYPE_01);
+GRANT SERVICE ROLE APP_<% depname %>_SVC!APP_<% depname %>_AXSROLE TO ROLE IDENTIFIER($APP_ROLE_TYPE_01);
+
 SHOW SERVICES;
 
 -- wait for service provisioning to complete
-CALL SYSTEM$WAIT(1, 'MINUTES');
+CALL SYSTEM$WAIT(2, 'MINUTES');
 
 -- check the status of service
 CALL SYSTEM$GET_SERVICE_STATUS($SERVICE_NAME);
+
+SHOW ENDPOINTS IN SERVICE IDENTIFIER($SERVICE_NAME);
+SET app_url = (SELECT "ingress_url" FROM TABLE(RESULT_SCAN(LAST_QUERY_ID())));
+ALTER SCHEMA IF EXISTS IDENTIFIER($DEPLOY_SCHEMA) SET COMMENT = $app_url;
